@@ -19,7 +19,7 @@ var hovered_bin_type = 0
 @onready var spawn_area = $SpawnArea
 @onready var timer = $Timer
 
-var trash_scene = preload("res://TrashItem.tscn")
+var trash_scene = preload("res://trash/TrashItem.tscn")
 
 func _ready():
 	randomize()
