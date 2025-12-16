@@ -15,6 +15,14 @@ var inorganic_bonus = 0
 var organic_upgrade_cost = 100
 var inorganic_upgrade_cost = 100
 
+var organic_send_time_cost = 100
+var inorganic_send_time_cost = 100
+var organic_capacity_cost = 100
+var inorganic_capacity_cost = 100
+
+var max_bin_organic_capacity = 10
+var max_bin_anorganic_capacity = 5
+
 # Bin Capacity Logic
 var bin_organic_count = 0
 var bin_anorganic_count = 0
@@ -30,10 +38,15 @@ var hovered_bin_type = 0
 @onready var time_label = $UI/TimeLabel
 @onready var game_over_panel = $UI/GameOverPanel
 @onready var shop_panel = $UI/ShopPanel
-@onready var shop_skip_button = $UI/ShopPanel/VBoxContainer/HBoxContainer4/Button
-@onready var shop_stack_button = $UI/ShopPanel/VBoxContainer/HBoxContainer/Button
-@onready var shop_organic_button = $UI/ShopPanel/VBoxContainer/HBoxContainer2/Button
-@onready var shop_inorganic_button = $UI/ShopPanel/VBoxContainer/HBoxContainer3/Button
+@onready var shop_skip_button = $"UI/ShopPanel/Shop Container/HBoxContainer4/Button"
+@onready var shop_stack_button = $"UI/ShopPanel/Shop Container/HBoxContainer/Button"
+@onready var shop_organic_button = $"UI/ShopPanel/Shop Container/HBoxContainer2/Button"
+@onready var shop_inorganic_button = $"UI/ShopPanel/Shop Container/HBoxContainer3/Button"
+@onready var shop_organic_time_button = $"UI/ShopPanel/Shop Container/HBoxContainer7/Button"
+@onready var shop_inorganic_time_button = $"UI/ShopPanel/Shop Container/HBoxContainer8/Button"
+@onready var shop_organic_capacity_button = $"UI/ShopPanel/Shop Container/HBoxContainer6/Button"
+@onready var shop_inorganic_capacity_button = $"UI/ShopPanel/Shop Container/HBoxContainer5/Button"
+@onready var shop_current_score_label = $"UI/ShopPanel/Shop Container/CurrentScore"
 @onready var final_score_label = $UI/GameOverPanel/FinalScoreLabel
 
 # Bin Nodes
@@ -62,6 +75,10 @@ func _ready():
 	shop_stack_button.pressed.connect(_on_buy_stack_upgrade_pressed)
 	shop_organic_button.pressed.connect(_on_buy_organic_upgrade_pressed)
 	shop_inorganic_button.pressed.connect(_on_buy_inorganic_upgrade_pressed)
+	shop_organic_time_button.pressed.connect(_on_buy_organic_time_upgrade_pressed)
+	shop_inorganic_time_button.pressed.connect(_on_buy_inorganic_time_upgrade_pressed)
+	shop_organic_capacity_button.pressed.connect(_on_buy_organic_capacity_upgrade_pressed)
+	shop_inorganic_capacity_button.pressed.connect(_on_buy_inorganic_capacity_upgrade_pressed)
 	
 	organic_send_button.pressed.connect(_on_organic_send_pressed)
 	organic_timer.timeout.connect(_on_organic_timer_timeout)
@@ -184,8 +201,12 @@ func drop_items():
 		# We are over a bin!
 		for item in held_items:
 			if is_instance_valid(item):
-				process_score(item, hovered_bin_type)
-				item.queue_free()
+				if process_score(item, hovered_bin_type):
+					item.queue_free()
+				else:
+					# Bin full, bounce/respawn
+					respawn_item(item)
+					item.SetCollision(true)
 	else:
 		# Return to spawn randomly
 		for item in held_items:
@@ -208,17 +229,26 @@ func process_score(item: TrashItem, bin_type: int):
 		
 	if correct:
 		if item.type == 0: # Organic
-			# score += 10 + organic_bonus
-			bin_organic_count += 1
+			if bin_organic_count < max_bin_organic_capacity:
+				bin_organic_count += 1
+				update_bin_ui()
+				return true
+			else:
+				return false # Full
 		else: # Inorganic
-			# score += 10 + inorganic_bonus
-			bin_anorganic_count += 1
-		update_bin_ui()
+			if bin_anorganic_count < max_bin_anorganic_capacity:
+				bin_anorganic_count += 1
+				update_bin_ui()
+				return true
+			else:
+				return false # Full
 	else:
 		score -= 5
 		update_ui()
+		return true # Wrong bin, item consumed but penalized
 	
 	update_ui()
+	return true
 
 
 func game_over():
@@ -234,6 +264,8 @@ func show_shop():
 	shop_panel.visible = true
 
 func update_shop_ui():
+	shop_current_score_label.text = "Current Coin: " + str(score)
+	
 	shop_stack_button.disabled = score < stack_upgrade_cost
 	shop_stack_button.text = "Buy Stack +1 (" + str(stack_upgrade_cost) + " score)"
 	
@@ -242,6 +274,18 @@ func update_shop_ui():
 	
 	shop_inorganic_button.disabled = score < inorganic_upgrade_cost
 	shop_inorganic_button.text = "Buy Coin +5 (" + str(inorganic_upgrade_cost) + " score)"
+
+	shop_organic_time_button.disabled = score < organic_send_time_cost
+	shop_organic_time_button.text = "Send Time -1s (" + str(organic_send_time_cost) + " score)"
+
+	shop_inorganic_time_button.disabled = score < inorganic_send_time_cost
+	shop_inorganic_time_button.text = "Send Time -1s (" + str(inorganic_send_time_cost) + " score)"
+
+	shop_organic_capacity_button.disabled = score < organic_capacity_cost
+	shop_organic_capacity_button.text = "Bin Capacity +2 (" + str(organic_capacity_cost) + " score)"
+
+	shop_inorganic_capacity_button.disabled = score < inorganic_capacity_cost
+	shop_inorganic_capacity_button.text = "Bin Capacity +2 (" + str(inorganic_capacity_cost) + " score)"
 
 func _on_buy_stack_upgrade_pressed():
 	if score >= stack_upgrade_cost:
@@ -266,6 +310,42 @@ func _on_buy_inorganic_upgrade_pressed():
 		
 		update_ui()
 		update_shop_ui()
+
+func _on_buy_organic_time_upgrade_pressed():
+	if score >= organic_send_time_cost:
+		score -= organic_send_time_cost
+		if organic_timer.wait_time > 1:
+			organic_timer.wait_time -= 1
+		
+		update_ui()
+		update_shop_ui()
+
+func _on_buy_inorganic_time_upgrade_pressed():
+	if score >= inorganic_send_time_cost:
+		score -= inorganic_send_time_cost
+		if anorganic_timer.wait_time > 1:
+			anorganic_timer.wait_time -= 1
+			
+		update_ui()
+		update_shop_ui()
+
+func _on_buy_organic_capacity_upgrade_pressed():
+	if score >= organic_capacity_cost:
+		score -= organic_capacity_cost
+		max_bin_organic_capacity += 2
+		
+		update_ui()
+		update_shop_ui()
+		update_bin_ui()
+
+func _on_buy_inorganic_capacity_upgrade_pressed():
+	if score >= inorganic_capacity_cost:
+		score -= inorganic_capacity_cost
+		max_bin_anorganic_capacity += 2
+		
+		update_ui()
+		update_shop_ui()
+		update_bin_ui()
 
 
 func _on_shop_skip_pressed():
@@ -294,8 +374,8 @@ func _on_bin_anorganic_mouse_exited():
 		hovered_bin_type = 0
 
 func update_bin_ui():
-	organic_indicator.text = str(bin_organic_count) + "/10"
-	anorganic_indicator.text = str(bin_anorganic_count) + "/5"
+	organic_indicator.text = str(bin_organic_count) + "/" + str(max_bin_organic_capacity)
+	anorganic_indicator.text = str(bin_anorganic_count) + "/" + str(max_bin_anorganic_capacity)
 
 func _on_organic_send_pressed():
 	if bin_organic_count > 0:
@@ -326,4 +406,3 @@ func _on_anorganic_timer_timeout():
 	anorganic_send_button.disabled = false
 	anorganic_timer.stop()
 	update_ui()
-

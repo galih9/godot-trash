@@ -83,7 +83,6 @@ theme_override_font_sizes/font_size = 24
 text = "Restart"
 
 [node name="ShopPanel" type="Panel" parent="UI"]
-visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -100,7 +99,7 @@ theme_override_font_sizes/font_size = 48
 text = "Shop"
 horizontal_alignment = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/ShopPanel"]
+[node name="Shop Container" type="VBoxContainer" parent="UI/ShopPanel"]
 layout_mode = 1
 anchors_preset = 13
 anchor_left = 0.5
@@ -114,54 +113,111 @@ grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="UI/ShopPanel/VBoxContainer"]
+[node name="CurrentScore" type="Label" parent="UI/ShopPanel/Shop Container"]
+layout_mode = 2
+text = "Current Coin: 0"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/ShopPanel/Shop Container"]
 layout_mode = 2
 alignment = 1
 
-[node name="Label" type="Label" parent="UI/ShopPanel/VBoxContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="UI/ShopPanel/Shop Container/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Stack Size +1"
 
-[node name="Button" type="Button" parent="UI/ShopPanel/VBoxContainer/HBoxContainer"]
+[node name="Button" type="Button" parent="UI/ShopPanel/Shop Container/HBoxContainer"]
 layout_mode = 2
 text = "Buy (100 score)"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="UI/ShopPanel/VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="UI/ShopPanel/Shop Container"]
 layout_mode = 2
 alignment = 1
 
-[node name="Label" type="Label" parent="UI/ShopPanel/VBoxContainer/HBoxContainer2"]
+[node name="Label" type="Label" parent="UI/ShopPanel/Shop Container/HBoxContainer2"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Coin Bonus +5 (Organic)"
 
-[node name="Button" type="Button" parent="UI/ShopPanel/VBoxContainer/HBoxContainer2"]
+[node name="Button" type="Button" parent="UI/ShopPanel/Shop Container/HBoxContainer2"]
 layout_mode = 2
 text = "Buy (100 score)"
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="UI/ShopPanel/VBoxContainer"]
+[node name="HBoxContainer3" type="HBoxContainer" parent="UI/ShopPanel/Shop Container"]
 layout_mode = 2
 alignment = 1
 
-[node name="Label" type="Label" parent="UI/ShopPanel/VBoxContainer/HBoxContainer3"]
+[node name="Label" type="Label" parent="UI/ShopPanel/Shop Container/HBoxContainer3"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Coin Bonus +5 (Recycle)"
 
-[node name="Button" type="Button" parent="UI/ShopPanel/VBoxContainer/HBoxContainer3"]
+[node name="Button" type="Button" parent="UI/ShopPanel/Shop Container/HBoxContainer3"]
 layout_mode = 2
 text = "Buy (100 score)"
 
-[node name="HBoxContainer4" type="HBoxContainer" parent="UI/ShopPanel/VBoxContainer"]
+[node name="HBoxContainer7" type="HBoxContainer" parent="UI/ShopPanel/Shop Container"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="UI/ShopPanel/Shop Container/HBoxContainer7"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Send Time -1s (Organic)"
+
+[node name="Button" type="Button" parent="UI/ShopPanel/Shop Container/HBoxContainer7"]
+layout_mode = 2
+text = "Buy (100 score)"
+
+[node name="HBoxContainer8" type="HBoxContainer" parent="UI/ShopPanel/Shop Container"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="UI/ShopPanel/Shop Container/HBoxContainer8"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Send Time -1s (Recycle)"
+
+[node name="Button" type="Button" parent="UI/ShopPanel/Shop Container/HBoxContainer8"]
+layout_mode = 2
+text = "Buy (100 score)"
+
+[node name="HBoxContainer6" type="HBoxContainer" parent="UI/ShopPanel/Shop Container"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="UI/ShopPanel/Shop Container/HBoxContainer6"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Bin Capacity +2 (Organic)"
+
+[node name="Button" type="Button" parent="UI/ShopPanel/Shop Container/HBoxContainer6"]
+layout_mode = 2
+text = "Buy (100 score)"
+
+[node name="HBoxContainer5" type="HBoxContainer" parent="UI/ShopPanel/Shop Container"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="UI/ShopPanel/Shop Container/HBoxContainer5"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Bin Capacity +2 (Recycle)"
+
+[node name="Button" type="Button" parent="UI/ShopPanel/Shop Container/HBoxContainer5"]
+layout_mode = 2
+text = "Buy (100 score)"
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="UI/ShopPanel/Shop Container"]
 layout_mode = 2
 
-[node name="Button" type="Button" parent="UI/ShopPanel/VBoxContainer/HBoxContainer4"]
+[node name="Button" type="Button" parent="UI/ShopPanel/Shop Container/HBoxContainer4"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Skip"
 
 [node name="SpawnArea" type="ColorRect" parent="."]
+visible = false
 offset_left = 100.0
 offset_top = 80.0
 offset_right = 1052.0
@@ -178,6 +234,7 @@ offset_bottom = 31.0
 text = "Spawn Area"
 
 [node name="BinOrganic" type="Area2D" parent="."]
+visible = false
 position = Vector2(350, 500)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="BinOrganic"]
@@ -227,6 +284,7 @@ offset_bottom = -97.0
 text = "Organic"
 
 [node name="BinAnorganic" type="Area2D" parent="."]
+visible = false
 position = Vector2(800, 500)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="BinAnorganic"]
