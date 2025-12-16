@@ -15,6 +15,8 @@ var hovered_bin_type = 0
 @onready var score_label = $UI/ScoreLabel
 @onready var time_label = $UI/TimeLabel
 @onready var game_over_panel = $UI/GameOverPanel
+@onready var shop_panel = $UI/ShopPanel
+@onready var shop_skip_button = $UI/ShopPanel/VBoxContainer/HBoxContainer4/Button
 @onready var final_score_label = $UI/GameOverPanel/FinalScoreLabel
 @onready var spawn_area = $SpawnArea
 @onready var timer = $Timer
@@ -25,6 +27,8 @@ func _ready():
 	randomize()
 	update_ui()
 	game_over_panel.visible = false
+	shop_panel.visible = false
+	shop_skip_button.pressed.connect(_on_shop_skip_pressed)
 
 func _process(delta):
 	if not game_active:
@@ -33,7 +37,19 @@ func _process(delta):
 	# Update Timer
 	time_left -= delta
 	if time_left <= 0:
-		game_over()
+		# Check if there is any trash left
+		var trash_count = 0
+		for child in get_children():
+			if child is TrashItem and not (child in held_items):
+				trash_count += 1
+		
+		# Also check held items just in case, though they should be counted or dropped
+		trash_count += held_items.size()
+		
+		if trash_count > 0:
+			game_over()
+		else:
+			show_shop()
 	
 	time_label.text = "Time: " + str(int(time_left))
 	
@@ -50,7 +66,7 @@ func update_ui():
 	score_label.text = "Score: " + str(score)
 
 func _on_timer_timeout():
-	if game_active:
+	if game_active and time_left > 10:
 		spawn_trash()
 
 func spawn_trash():
@@ -149,6 +165,18 @@ func game_over():
 	timer.stop()
 	game_over_panel.visible = true
 	final_score_label.text = "Final Score: " + str(score)
+
+func show_shop():
+	game_active = false
+	timer.stop()
+	shop_panel.visible = true
+
+func _on_shop_skip_pressed():
+	shop_panel.visible = false
+	time_left = 60.0
+	game_active = true
+	timer.start()
+	update_ui()
 
 func _on_restart_button_pressed():
 	get_tree().reload_current_scene()
