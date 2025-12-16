@@ -125,7 +125,7 @@ text = "Stack Size +1"
 
 [node name="Button" type="Button" parent="UI/ShopPanel/VBoxContainer/HBoxContainer"]
 layout_mode = 2
-text = "Buy"
+text = "Buy (100 score)"
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="UI/ShopPanel/VBoxContainer"]
 layout_mode = 2
@@ -138,7 +138,7 @@ text = "Coin Bonus +5 (Organic)"
 
 [node name="Button" type="Button" parent="UI/ShopPanel/VBoxContainer/HBoxContainer2"]
 layout_mode = 2
-text = "Buy"
+text = "Buy (100 score)"
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="UI/ShopPanel/VBoxContainer"]
 layout_mode = 2
@@ -151,7 +151,7 @@ text = "Coin Bonus +5 (Recycle)"
 
 [node name="Button" type="Button" parent="UI/ShopPanel/VBoxContainer/HBoxContainer3"]
 layout_mode = 2
-text = "Buy"
+text = "Buy (100 score)"
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="UI/ShopPanel/VBoxContainer"]
 layout_mode = 2

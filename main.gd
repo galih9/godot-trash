@@ -6,7 +6,15 @@ var game_active = true
 
 # Inventory
 var held_items: Array[TrashItem] = []
-var max_held_items = 3
+var max_held_items = 1
+
+# Upgrades
+var stack_upgrade_cost = 100
+var organic_bonus = 0
+var inorganic_bonus = 0
+var organic_upgrade_cost = 100
+var inorganic_upgrade_cost = 100
+
 
 # Hover tracking
 # 0 = None, 1 = Organic, 2 = Inorganic
@@ -17,7 +25,12 @@ var hovered_bin_type = 0
 @onready var game_over_panel = $UI/GameOverPanel
 @onready var shop_panel = $UI/ShopPanel
 @onready var shop_skip_button = $UI/ShopPanel/VBoxContainer/HBoxContainer4/Button
+@onready var shop_stack_button = $UI/ShopPanel/VBoxContainer/HBoxContainer/Button
+@onready var shop_organic_button = $UI/ShopPanel/VBoxContainer/HBoxContainer2/Button
+@onready var shop_inorganic_button = $UI/ShopPanel/VBoxContainer/HBoxContainer3/Button
 @onready var final_score_label = $UI/GameOverPanel/FinalScoreLabel
+
+
 @onready var spawn_area = $SpawnArea
 @onready var timer = $Timer
 
@@ -29,6 +42,10 @@ func _ready():
 	game_over_panel.visible = false
 	shop_panel.visible = false
 	shop_skip_button.pressed.connect(_on_shop_skip_pressed)
+	shop_stack_button.pressed.connect(_on_buy_stack_upgrade_pressed)
+	shop_organic_button.pressed.connect(_on_buy_organic_upgrade_pressed)
+	shop_inorganic_button.pressed.connect(_on_buy_inorganic_upgrade_pressed)
+
 
 func _process(delta):
 	if not game_active:
@@ -154,11 +171,15 @@ func process_score(item: TrashItem, bin_type: int):
 		correct = true
 		
 	if correct:
-		score += 10
+		if item.type == 0: # Organic
+			score += 10 + organic_bonus
+		else: # Inorganic
+			score += 10 + inorganic_bonus
 	else:
 		score -= 5
 	
 	update_ui()
+
 
 func game_over():
 	game_active = false
@@ -169,7 +190,43 @@ func game_over():
 func show_shop():
 	game_active = false
 	timer.stop()
+	update_shop_ui()
 	shop_panel.visible = true
+
+func update_shop_ui():
+	shop_stack_button.disabled = score < stack_upgrade_cost
+	shop_stack_button.text = "Buy Stack +1 (" + str(stack_upgrade_cost) + " score)"
+	
+	shop_organic_button.disabled = score < organic_upgrade_cost
+	shop_organic_button.text = "Buy Coin +5 (" + str(organic_upgrade_cost) + " score)"
+	
+	shop_inorganic_button.disabled = score < inorganic_upgrade_cost
+	shop_inorganic_button.text = "Buy Coin +5 (" + str(inorganic_upgrade_cost) + " score)"
+
+func _on_buy_stack_upgrade_pressed():
+	if score >= stack_upgrade_cost:
+		score -= stack_upgrade_cost
+		max_held_items += 1
+		
+		update_ui()
+		update_shop_ui()
+
+func _on_buy_organic_upgrade_pressed():
+	if score >= organic_upgrade_cost:
+		score -= organic_upgrade_cost
+		organic_bonus += 5
+		
+		update_ui()
+		update_shop_ui()
+
+func _on_buy_inorganic_upgrade_pressed():
+	if score >= inorganic_upgrade_cost:
+		score -= inorganic_upgrade_cost
+		inorganic_bonus += 5
+		
+		update_ui()
+		update_shop_ui()
+
 
 func _on_shop_skip_pressed():
 	shop_panel.visible = false
