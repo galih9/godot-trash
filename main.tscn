@@ -1,6 +1,155 @@
-[gd_scene load_steps=2 format=3 uid="uid://bcpem8y4r17m6"]
+[gd_scene load_steps=4 format=3 uid="uid://c8j7q6g3d5v4y"]
 
-[ext_resource type="Script" uid="uid://b6rgl75ipyvlg" path="res://main.gd" id="1_ig7tw"]
+[ext_resource type="Script" path="res://main.gd" id="1_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bin"]
+size = Vector2(200, 200)
 
 [node name="Main" type="Node2D"]
-script = ExtResource("1_ig7tw")
+script = ExtResource("1_script")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="ScoreLabel" type="Label" parent="UI"]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 166.0
+offset_bottom = 69.0
+theme_override_font_sizes/font_size = 32
+text = "Score: 0"
+mouse_filter = 2
+
+[node name="TimeLabel" type="Label" parent="UI"]
+offset_left = 950.0
+offset_top = 20.0
+offset_right = 1100.0
+offset_bottom = 69.0
+theme_override_font_sizes/font_size = 32
+text = "Time: 60"
+mouse_filter = 2
+
+[node name="GameOverPanel" type="Panel" parent="UI"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="UI/GameOverPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -50.0
+offset_right = 150.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 48
+text = "GAME OVER"
+horizontal_alignment = 1
+
+[node name="FinalScoreLabel" type="Label" parent="UI/GameOverPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = 10.0
+offset_right = 150.0
+offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Final Score: 0"
+horizontal_alignment = 1
+
+[node name="RestartButton" type="Button" parent="UI/GameOverPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = 70.0
+offset_right = 100.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 24
+text = "Restart"
+
+[node name="SpawnArea" type="ColorRect" parent="."]
+offset_left = 100.0
+offset_top = 80.0
+offset_right = 1052.0
+offset_bottom = 330.0
+mouse_filter = 2
+color = Color(0.2, 0.2, 0.2, 0.3)
+
+[node name="Label" type="Label" parent="SpawnArea"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 104.0
+offset_bottom = 31.0
+text = "Spawn Area"
+
+[node name="BinOrganic" type="Area2D" parent="."]
+position = Vector2(350, 500)
+
+[node name="ColorRect" type="ColorRect" parent="BinOrganic"]
+offset_left = -100.0
+offset_top = -100.0
+offset_right = 100.0
+offset_bottom = 100.0
+mouse_filter = 2
+color = Color(0, 0.6, 0.1, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BinOrganic"]
+shape = SubResource("RectangleShape2D_bin")
+
+[node name="Label" type="Label" parent="BinOrganic"]
+offset_left = -30.0
+offset_top = -120.0
+offset_right = 30.0
+offset_bottom = -97.0
+text = "Organic"
+
+[node name="BinAnorganic" type="Area2D" parent="."]
+position = Vector2(800, 500)
+
+[node name="ColorRect" type="ColorRect" parent="BinAnorganic"]
+offset_left = -100.0
+offset_top = -100.0
+offset_right = 100.0
+offset_bottom = 100.0
+mouse_filter = 2
+color = Color(0.2, 0.4, 0.8, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BinAnorganic"]
+shape = SubResource("RectangleShape2D_bin")
+
+[node name="Label" type="Label" parent="BinAnorganic"]
+offset_left = -37.0
+offset_top = -120.0
+offset_right = 38.0
+offset_bottom = -97.0
+text = "Anorganic"
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 2.0
+autostart = true
+
+[connection signal="pressed" from="UI/GameOverPanel/RestartButton" to="." method="_on_restart_button_pressed"]
+[connection signal="mouse_entered" from="BinOrganic" to="." method="_on_bin_organic_mouse_entered"]
+[connection signal="mouse_exited" from="BinOrganic" to="." method="_on_bin_organic_mouse_exited"]
+[connection signal="mouse_entered" from="BinAnorganic" to="." method="_on_bin_anorganic_mouse_entered"]
+[connection signal="mouse_exited" from="BinAnorganic" to="." method="_on_bin_anorganic_mouse_exited"]
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
