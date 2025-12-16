@@ -15,6 +15,12 @@ var inorganic_bonus = 0
 var organic_upgrade_cost = 100
 var inorganic_upgrade_cost = 100
 
+# Bin Capacity Logic
+var bin_organic_count = 0
+var bin_anorganic_count = 0
+var bin_organic_shipping = 0
+var bin_anorganic_shipping = 0
+
 
 # Hover tracking
 # 0 = None, 1 = Organic, 2 = Inorganic
@@ -29,6 +35,17 @@ var hovered_bin_type = 0
 @onready var shop_organic_button = $UI/ShopPanel/VBoxContainer/HBoxContainer2/Button
 @onready var shop_inorganic_button = $UI/ShopPanel/VBoxContainer/HBoxContainer3/Button
 @onready var final_score_label = $UI/GameOverPanel/FinalScoreLabel
+
+# Bin Nodes
+@onready var organic_indicator = $BinOrganic/VBoxContainer/Indicator
+@onready var organic_send_button = $BinOrganic/VBoxContainer/Button
+@onready var organic_progress = $BinOrganic/VBoxContainer/ProgressBar
+@onready var organic_timer = $BinOrganic/VBoxContainer/Timer
+
+@onready var anorganic_indicator = $BinAnorganic/VBoxContainer/Indicator
+@onready var anorganic_send_button = $BinAnorganic/VBoxContainer/Button
+@onready var anorganic_progress = $BinAnorganic/VBoxContainer/ProgressBar
+@onready var anorganic_timer = $BinAnorganic/VBoxContainer/Timer
 
 
 @onready var spawn_area = $SpawnArea
@@ -45,6 +62,14 @@ func _ready():
 	shop_stack_button.pressed.connect(_on_buy_stack_upgrade_pressed)
 	shop_organic_button.pressed.connect(_on_buy_organic_upgrade_pressed)
 	shop_inorganic_button.pressed.connect(_on_buy_inorganic_upgrade_pressed)
+	
+	organic_send_button.pressed.connect(_on_organic_send_pressed)
+	organic_timer.timeout.connect(_on_organic_timer_timeout)
+	
+	anorganic_send_button.pressed.connect(_on_anorganic_send_pressed)
+	anorganic_timer.timeout.connect(_on_anorganic_timer_timeout)
+	
+	update_bin_ui()
 
 
 func _process(delta):
@@ -78,6 +103,17 @@ func _process(delta):
 			if is_instance_valid(item):
 				# Stack them slightly
 				item.global_position = mouse_pos + Vector2(0, i * 20)
+
+	# Update Progress Bars
+	if not organic_timer.is_stopped():
+		organic_progress.value = (1 - organic_timer.time_left / organic_timer.wait_time) * 100
+	else:
+		organic_progress.value = 0
+		
+	if not anorganic_timer.is_stopped():
+		anorganic_progress.value = (1 - anorganic_timer.time_left / anorganic_timer.wait_time) * 100
+	else:
+		anorganic_progress.value = 0
 
 func update_ui():
 	score_label.text = "Score: " + str(score)
@@ -172,11 +208,15 @@ func process_score(item: TrashItem, bin_type: int):
 		
 	if correct:
 		if item.type == 0: # Organic
-			score += 10 + organic_bonus
+			# score += 10 + organic_bonus
+			bin_organic_count += 1
 		else: # Inorganic
-			score += 10 + inorganic_bonus
+			# score += 10 + inorganic_bonus
+			bin_anorganic_count += 1
+		update_bin_ui()
 	else:
 		score -= 5
+		update_ui()
 	
 	update_ui()
 
@@ -252,3 +292,38 @@ func _on_bin_anorganic_mouse_entered():
 func _on_bin_anorganic_mouse_exited():
 	if hovered_bin_type == 2:
 		hovered_bin_type = 0
+
+func update_bin_ui():
+	organic_indicator.text = str(bin_organic_count) + "/10"
+	anorganic_indicator.text = str(bin_anorganic_count) + "/5"
+
+func _on_organic_send_pressed():
+	if bin_organic_count > 0:
+		bin_organic_shipping = bin_organic_count
+		bin_organic_count = 0
+		organic_send_button.disabled = true
+		organic_timer.start()
+		update_bin_ui()
+
+func _on_organic_timer_timeout():
+	score += bin_organic_shipping * (10 + organic_bonus)
+	bin_organic_shipping = 0
+	organic_send_button.disabled = false
+	organic_timer.stop()
+	update_ui()
+
+func _on_anorganic_send_pressed():
+	if bin_anorganic_count > 0:
+		bin_anorganic_shipping = bin_anorganic_count
+		bin_anorganic_count = 0
+		anorganic_send_button.disabled = true
+		anorganic_timer.start()
+		update_bin_ui()
+
+func _on_anorganic_timer_timeout():
+	score += bin_anorganic_shipping * (10 + inorganic_bonus)
+	bin_anorganic_shipping = 0
+	anorganic_send_button.disabled = false
+	anorganic_timer.stop()
+	update_ui()
+

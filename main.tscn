@@ -180,6 +180,34 @@ text = "Spawn Area"
 [node name="BinOrganic" type="Area2D" parent="."]
 position = Vector2(350, 500)
 
+[node name="VBoxContainer" type="VBoxContainer" parent="BinOrganic"]
+offset_left = -64.0
+offset_right = 71.5
+offset_bottom = 89.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Indicator" type="Label" parent="BinOrganic/VBoxContainer"]
+z_index = 1
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "0/10"
+horizontal_alignment = 1
+vertical_alignment = 3
+
+[node name="Button" type="Button" parent="BinOrganic/VBoxContainer"]
+z_index = 1
+layout_mode = 2
+text = "Send"
+
+[node name="ProgressBar" type="ProgressBar" parent="BinOrganic/VBoxContainer"]
+z_index = 1
+layout_mode = 2
+
+[node name="Timer" type="Timer" parent="BinOrganic/VBoxContainer"]
+wait_time = 5.0
+
 [node name="ColorRect" type="ColorRect" parent="BinOrganic"]
 offset_left = -100.0
 offset_top = -100.0
@@ -200,6 +228,34 @@ text = "Organic"
 
 [node name="BinAnorganic" type="Area2D" parent="."]
 position = Vector2(800, 500)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="BinAnorganic"]
+offset_left = -64.0
+offset_right = 71.5
+offset_bottom = 89.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Indicator" type="Label" parent="BinAnorganic/VBoxContainer"]
+z_index = 1
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "0/5"
+horizontal_alignment = 1
+vertical_alignment = 3
+
+[node name="Button" type="Button" parent="BinAnorganic/VBoxContainer"]
+z_index = 1
+layout_mode = 2
+text = "Send"
+
+[node name="ProgressBar" type="ProgressBar" parent="BinAnorganic/VBoxContainer"]
+z_index = 1
+layout_mode = 2
+
+[node name="Timer" type="Timer" parent="BinAnorganic/VBoxContainer"]
+wait_time = 10.0
 
 [node name="ColorRect" type="ColorRect" parent="BinAnorganic"]
 offset_left = -100.0
