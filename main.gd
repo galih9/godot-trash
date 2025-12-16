@@ -154,7 +154,18 @@ func respawn_item(item):
 	var rect = spawn_area.get_rect()
 	var x = randf_range(rect.position.x, rect.position.x + rect.size.x)
 	var y = randf_range(rect.position.y, rect.position.y + rect.size.y)
-	item.position = Vector2(x, y)
+	
+	# Start from top (random X above screen)
+	# We use a tween to animate it falling/flowing to the target spot
+	var start_x = randf_range(rect.position.x, rect.position.x + rect.size.x)
+	var start_pos = Vector2(start_x, -100)
+	var target_pos = Vector2(x, y)
+	
+	item.position = start_pos
+	
+	var tween = create_tween()
+	# Animate to target position over 0.8 seconds (adjust speed as needed)
+	tween.tween_property(item, "position", target_pos, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 func _on_trash_clicked(item: TrashItem):
 	if not game_active:
@@ -245,6 +256,11 @@ func process_score(item: TrashItem, bin_type: int):
 	else:
 		score -= 5
 		update_ui()
+		shake_bin(bin_type)
+		
+		# Show -5 indicator
+		var bin_node = $BinOrganic if bin_type == 1 else $BinAnorganic
+		spawn_float_indicator(bin_node.position + Vector2(0, -50), "-5", Color(1, 0.3, 0.3)) # Red
 		return true # Wrong bin, item consumed but penalized
 	
 	update_ui()
@@ -386,7 +402,12 @@ func _on_organic_send_pressed():
 		update_bin_ui()
 
 func _on_organic_timer_timeout():
-	score += bin_organic_shipping * (10 + organic_bonus)
+	var gained = bin_organic_shipping * (10 + organic_bonus)
+	score += gained
+	
+	# Show indicator
+	spawn_float_indicator($BinOrganic.position + Vector2(0, -50), "+" + str(gained), Color(0.3, 1, 0.3)) # Green
+	
 	bin_organic_shipping = 0
 	organic_send_button.disabled = false
 	organic_timer.stop()
@@ -401,8 +422,50 @@ func _on_anorganic_send_pressed():
 		update_bin_ui()
 
 func _on_anorganic_timer_timeout():
-	score += bin_anorganic_shipping * (10 + inorganic_bonus)
+	var gained = bin_anorganic_shipping * (10 + inorganic_bonus)
+	score += gained
+	
+	# Show indicator
+	spawn_float_indicator($BinAnorganic.position + Vector2(0, -50), "+" + str(gained), Color(0.3, 1, 0.3)) # Green
+	
 	bin_anorganic_shipping = 0
 	anorganic_send_button.disabled = false
 	anorganic_timer.stop()
 	update_ui()
+
+# --- Visual Effects Helpers ---
+
+func shake_bin(bin_type: int):
+	var bin_node = null
+	if bin_type == 1:
+		bin_node = $BinOrganic
+	elif bin_type == 2:
+		bin_node = $BinAnorganic
+		
+	if bin_node:
+		var original_pos = bin_node.position
+		# Use a simpler shake: offset slightly left, then right, then center
+		var tween = create_tween()
+		tween.tween_property(bin_node, "position", original_pos + Vector2(10, 0), 0.05)
+		tween.tween_property(bin_node, "position", original_pos - Vector2(10, 0), 0.05)
+		tween.tween_property(bin_node, "position", original_pos + Vector2(5, 0), 0.05)
+		tween.tween_property(bin_node, "position", original_pos - Vector2(5, 0), 0.05)
+		tween.tween_property(bin_node, "position", original_pos, 0.05)
+
+func spawn_float_indicator(pos: Vector2, text: String, color: Color):
+	var label = Label.new()
+	label.text = text
+	label.modulate = color
+	# Make it large and bold if possible, or just default size
+	label.add_theme_font_size_override("font_size", 32)
+	label.position = pos
+	label.z_index = 100 # On top of most things
+	add_child(label)
+	
+	var tween = create_tween()
+	# Float up and fade out
+	tween.set_parallel(true)
+	tween.tween_property(label, "position", pos + Vector2(0, -50), 1.0).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(label, "modulate:a", 0.0, 1.0).set_ease(Tween.EASE_IN)
+	# Delete after tween
+	tween.chain().tween_callback(label.queue_free)

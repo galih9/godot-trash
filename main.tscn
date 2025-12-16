@@ -83,6 +83,7 @@ theme_override_font_sizes/font_size = 24
 text = "Restart"
 
 [node name="ShopPanel" type="Panel" parent="UI"]
+visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -217,7 +218,6 @@ size_flags_horizontal = 3
 text = "Skip"
 
 [node name="SpawnArea" type="ColorRect" parent="."]
-visible = false
 offset_left = 100.0
 offset_top = 80.0
 offset_right = 1052.0
@@ -234,7 +234,6 @@ offset_bottom = 31.0
 text = "Spawn Area"
 
 [node name="BinOrganic" type="Area2D" parent="."]
-visible = false
 position = Vector2(350, 500)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="BinOrganic"]
@@ -284,7 +283,6 @@ offset_bottom = -97.0
 text = "Organic"
 
 [node name="BinAnorganic" type="Area2D" parent="."]
-visible = false
 position = Vector2(800, 500)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="BinAnorganic"]
