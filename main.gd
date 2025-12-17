@@ -11,6 +11,9 @@ var bin_organic_count = 0
 var bin_anorganic_count = 0
 var bin_organic_shipping = 0
 var bin_anorganic_shipping = 0
+var consecutive_correct_drops = 0
+var organic_shipping_combo_bonus = 0.0
+var anorganic_shipping_combo_bonus = 0.0
 
 
 # Hover tracking
@@ -226,6 +229,7 @@ func process_score(item: TrashItem, bin_type: int):
 		if item.type == 0: # Organic
 			if bin_organic_count < Global.max_bin_organic_capacity:
 				bin_organic_count += 1
+				consecutive_correct_drops += 1
 				update_bin_ui()
 				return true
 			else:
@@ -233,12 +237,14 @@ func process_score(item: TrashItem, bin_type: int):
 		else: # Inorganic
 			if bin_anorganic_count < Global.max_bin_anorganic_capacity:
 				bin_anorganic_count += 1
+				consecutive_correct_drops += 1
 				update_bin_ui()
 				return true
 			else:
 				return false # Full
 	else:
 		Global.score -= 5
+		consecutive_correct_drops = 0
 		shake_bin(bin_type)
 		
 		# Show -5 indicator
@@ -335,6 +341,7 @@ func update_bin_ui():
 func _on_organic_send_pressed():
 	if bin_organic_count > 0:
 		bin_organic_shipping = bin_organic_count
+		organic_shipping_combo_bonus = get_combo_bonus_percentage()
 		bin_organic_count = 0
 		organic_send_button.disabled = true
 		
@@ -348,10 +355,20 @@ func _on_organic_send_pressed():
 
 func _on_organic_timer_timeout():
 	var gained = bin_organic_shipping * (10 + Global.organic_bonus)
-	Global.score += gained
+	
+	# Apply Combo Bonus
+	var combo_value = gained * organic_shipping_combo_bonus
+	
+	# Apply Capacity Bonus
+	var capacity_value = 0
+	if bin_organic_shipping == Global.max_bin_organic_capacity:
+		capacity_value = gained * 0.20
+		
+	var total_gained = gained + combo_value + capacity_value
+	Global.score += total_gained
 	
 	# Show indicator
-	spawn_float_indicator($BinOrganic.position + Vector2(0, -50), "+" + str(gained), Color(0.3, 1, 0.3)) # Green
+	spawn_float_indicator($BinOrganic.position + Vector2(0, -50), "+" + str(int(total_gained)), Color(0.3, 1, 0.3)) # Green
 	
 	bin_organic_shipping = 0
 	organic_send_button.disabled = false
@@ -361,6 +378,7 @@ func _on_organic_timer_timeout():
 func _on_anorganic_send_pressed():
 	if bin_anorganic_count > 0:
 		bin_anorganic_shipping = bin_anorganic_count
+		anorganic_shipping_combo_bonus = get_combo_bonus_percentage()
 		bin_anorganic_count = 0
 		anorganic_send_button.disabled = true
 		
@@ -374,15 +392,37 @@ func _on_anorganic_send_pressed():
 
 func _on_anorganic_timer_timeout():
 	var gained = bin_anorganic_shipping * (10 + Global.inorganic_bonus)
-	Global.score += gained
+	
+	# Apply Combo Bonus
+	var combo_value = gained * anorganic_shipping_combo_bonus
+	
+	# Apply Capacity Bonus
+	var capacity_value = 0
+	if bin_anorganic_shipping == Global.max_bin_anorganic_capacity:
+		capacity_value = gained * 0.20
+	
+	var total_gained = gained + combo_value + capacity_value
+	Global.score += total_gained
 	
 	# Show indicator
-	spawn_float_indicator($BinAnorganic.position + Vector2(0, -50), "+" + str(gained), Color(0.3, 1, 0.3)) # Green
+	spawn_float_indicator($BinAnorganic.position + Vector2(0, -50), "+" + str(int(total_gained)), Color(0.3, 1, 0.3)) # Green
 	
 	bin_anorganic_shipping = 0
 	anorganic_send_button.disabled = false
 	anorganic_timer.stop()
 	update_ui()
+
+# --- Helper Functions ---
+func get_combo_bonus_percentage() -> float:
+	if consecutive_correct_drops >= 20:
+		return 0.20
+	elif consecutive_correct_drops >= 15:
+		return 0.15
+	elif consecutive_correct_drops >= 10:
+		return 0.10
+	elif consecutive_correct_drops >= 5:
+		return 0.05
+	return 0.0
 
 # --- Visual Effects Helpers ---
 
