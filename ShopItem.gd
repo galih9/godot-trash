@@ -21,6 +21,11 @@ func update_button_text():
 	button.text = "Buy (" + str(cost) + " score)"
 
 func update_status(current_score):
+	# Re-fetch cost as it might have increased
+	var data = Global.upgrades[upgrade_index]
+	cost = data.cost
+	update_button_text()
+	
 	button.disabled = current_score < cost
 
 func _on_button_pressed():

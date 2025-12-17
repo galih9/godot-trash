@@ -100,6 +100,7 @@ func buy_upgrade(upgrade_idx):
 	if can_buy(data.cost):
 		score -= data.cost
 		apply_upgrade(data)
+		data.cost *= 2 # Double the cost
 		upgrade_purchased.emit(data.id)
 		return true
 	return false
