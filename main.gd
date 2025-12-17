@@ -48,6 +48,15 @@ var trash_scene = preload("res://trash/TrashItem.tscn")
 var shop_item_scene = preload("res://ShopItem.tscn")
 var shop_items_nodes = []
 
+const TRASH_VARIANTS = [
+	{ "name": "Banana Peel", "type": 0, "capacity": 1, "texture_path": "res://assets/images/banana.png", "weight": 10 },
+	{ "name": "Biten Apple", "type": 0, "capacity": 1, "texture_path": "res://assets/images/apple.png", "weight": 10 },
+	{ "name": "Watermelon Rind", "type": 0, "capacity": 2, "texture_path": "res://assets/images/watermelon.png", "weight": 3 },
+	{ "name": "Empty Juicebox", "type": 1, "capacity": 1, "texture_path": "res://assets/images/juice.png", "weight": 10 },
+	{ "name": "Empty Bottle", "type": 1, "capacity": 1, "texture_path": "res://assets/images/bottle.png", "weight": 10 },
+	{ "name": "Empty Foodbox", "type": 1, "capacity": 2, "texture_path": "res://assets/images/box.png", "weight": 3 }
+]
+
 func _ready():
 	randomize()
 	Global.reset()
@@ -131,7 +140,23 @@ func _on_timer_timeout():
 
 func spawn_trash():
 	var trash = trash_scene.instantiate()
-	trash.type = randi() % 2 # 0 or 1
+	
+	# Weighted Random Selection
+	var total_weight = 0
+	for variant in TRASH_VARIANTS:
+		total_weight += variant.weight
+		
+	var roll = randi_range(0, total_weight - 1)
+	var selected_variant = TRASH_VARIANTS[0]
+	var current_weight = 0
+	
+	for variant in TRASH_VARIANTS:
+		current_weight += variant.weight
+		if roll < current_weight:
+			selected_variant = variant
+			break
+	
+	trash.setup(selected_variant)
 	
 	respawn_item(trash)
 	
@@ -227,16 +252,16 @@ func process_score(item: TrashItem, bin_type: int):
 		
 	if correct:
 		if item.type == 0: # Organic
-			if bin_organic_count < Global.max_bin_organic_capacity:
-				bin_organic_count += 1
+			if bin_organic_count + item.capacity <= Global.max_bin_organic_capacity:
+				bin_organic_count += item.capacity
 				consecutive_correct_drops += 1
 				update_bin_ui()
 				return true
 			else:
 				return false # Full
 		else: # Inorganic
-			if bin_anorganic_count < Global.max_bin_anorganic_capacity:
-				bin_anorganic_count += 1
+			if bin_anorganic_count + item.capacity <= Global.max_bin_anorganic_capacity:
+				bin_anorganic_count += item.capacity
 				consecutive_correct_drops += 1
 				update_bin_ui()
 				return true
