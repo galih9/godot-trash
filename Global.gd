@@ -84,6 +84,8 @@ func _ready():
 
 func reset():
 	score = 0
+	current_stage = 1
+
 	max_held_items = 1
 	organic_bonus = 0
 	inorganic_bonus = 0
@@ -111,3 +113,6 @@ func apply_upgrade(data):
 		set(data.target_var, curr + data.val)
 	elif data.op == "sub":
 		set(data.target_var, curr - data.val)
+
+var current_stage = 1
+

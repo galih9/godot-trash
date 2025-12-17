@@ -67,6 +67,13 @@ func _ready():
 	generate_shop_ui()
 	update_ui()
 	update_bin_ui()
+	update_spawn_rate()
+
+func update_spawn_rate():
+	# Initial is 2.0, decrease by 10% each stage, min 0.5
+	var new_time = max(0.5, 2.0 * pow(0.9, Global.current_stage - 1))
+	timer.wait_time = new_time
+
 
 
 func _process(delta):
@@ -294,6 +301,11 @@ func _on_upgrade_purchased(upgrade_id):
 func _on_shop_skip_pressed():
 	shop_panel.visible = false
 	time_left = 60.0
+	
+	# Increase difficulty
+	Global.current_stage += 1
+	update_spawn_rate()
+	
 	game_active = true
 	timer.start()
 	update_ui()
